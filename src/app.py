@@ -29,9 +29,9 @@ def listClients():
         return jsonify({'message':'false'})
 
 
-#Decorador que sirve para
+#Decorador que sirve para:
 #Declara la ruta
-#Asignar el vebo por el que va a recibir la solictud
+#Asignar el verbo por el que va a recibir la solictud
 #Pasar parametros <parametro> indica que vamosa  pasar un parametro 
 # Funcion para consultar un solo cliente
 @app.route('/get/<client>',methods=['GET'])
@@ -93,9 +93,52 @@ def registerClient():
     except Exception as ex:
         return ex
 
-#Tarea para mañana 
 #Crear funcion para eliminar y actualizar
+@app.route('/delete/<id>',methods=['DELETE'])
+def deleteCliente(id):
+    try:
+        #PRIMERO VERIFICAMOS SI EXISTE EN REGISTRO
+        cursor  = conection.connection.cursor()
+        sql     = "SELECT * FROM cliente WHERE id ='{0}'".format(id)
+        cursor.execute(sql)
+        datos   = cursor.fetchone()
+        # Si existe lo borramos
+        if datos != None:
+            cursor  = conection.connection.cursor()
+            sql     = "DELETE FROM cliente WHERE id ='{0}'".format(id)
+            cursor.execute(sql)
+            conection.connection.commit()
+            return jsonify({'data':'Registro {0} Eliminado'.format(id),'message':'success'})
+        else:
+            return jsonify({'message':'Registro Inexistente'})
+    except Exception as ex:
+        return "Error"
 
+
+@app.route('/upateclient/<id>', methods=['PUT'])
+def updateCliente(id):
+    try:
+        print(request.json)
+        #PRIMERO VERIFICAMOS SI EXISTE EN REGISTRO
+        cursor  = conection.connection.cursor()
+        sql     = "SELECT * FROM cliente WHERE id ='{0}'".format(id)
+        cursor.execute(sql)
+        datos   = cursor.fetchone()
+        # Si existe lo actualizamos
+        if datos != None:
+            cursor  = conection.connection.cursor()
+            sql     = """UPDATE cliente SET nombre = '{0}', direccion = '{1}', telefono = '{2}' 
+            WHERE id = '{3}'""".format(request.json['nombre'],
+                                             request.json['direccion'],
+                                             request.json['telefono'],
+                                             id)
+            cursor.execute(sql)
+            conection.connection.commit()
+            return jsonify({'data':'Registro {0} Actualizado'.format(id),'message':'success'})
+        else:
+            return jsonify({'message':'Registro Inexistente'})
+    except Exception as ex:
+            return ex
 
 
 
